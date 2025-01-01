@@ -471,30 +471,49 @@ func IsSpecial(info *Info) bool {
 	return false
 }
 
-func IsIgnored(info *Info) bool {
+type ignoreSpec struct {
+	class, name *regexp.Regexp
+}
 
+func (spec *ignoreSpec) String() string {
+	return spec.class.String() + " " + spec.name.String()
+}
+
+var windowIgnoreList []ignoreSpec
+
+func getWindowIgnoreList() []ignoreSpec {
+	if len(windowIgnoreList) == 0 && len(common.Config.WindowIgnore) > 0 {
+		for _, s := range common.Config.WindowIgnore {
+			conf_class := s[0]
+			conf_name := s[1]
+
+			spec := ignoreSpec{
+				class: regexp.MustCompile(strings.ToLower(conf_class)),
+				name:  regexp.MustCompile(strings.ToLower(conf_name)),
+			}
+			windowIgnoreList = append(windowIgnoreList, spec)
+		}
+	}
+
+	return windowIgnoreList
+}
+
+func IsIgnored(info *Info) bool {
 	// Check invalid windows
 	if len(info.Class) == 0 {
 		log.Info("Ignore invalid window")
 		return true
 	}
-
 	// Check ignored windows
-	for _, s := range common.Config.WindowIgnore {
-		conf_class := s[0]
-		conf_name := s[1]
-
-		reg_class := regexp.MustCompile(strings.ToLower(conf_class))
-		reg_name := regexp.MustCompile(strings.ToLower(conf_name))
-
+	for _, spec := range getWindowIgnoreList() {
 		// Ignore all windows with this class
-		class_match := reg_class.MatchString(strings.ToLower(info.Class))
+		class_match := spec.class.MatchString(strings.ToLower(info.Class))
 
 		// But allow the window with a special name
-		name_match := conf_name != "" && reg_name.MatchString(strings.ToLower(info.Name))
+		name_match := spec.name.String() != "" && spec.name.MatchString(strings.ToLower(info.Name))
 
 		if class_match && !name_match {
-			log.Info("Ignore window with ", strings.TrimSpace(strings.Join(s, " ")), " from config [", info.Class, "]")
+			log.Info("Ignore window with ", spec.String(), " from config [", info.Name, "]")
 			return true
 		}
 	}
