@@ -342,7 +342,7 @@ func (c *Client) Update() {
 }
 
 func (c *Client) Write() {
-	if common.CacheDisabled() {
+	if common.CacheDisabled() || !common.Config.CacheWindows {
 		return
 	}
 
@@ -368,7 +368,7 @@ func (c *Client) Write() {
 }
 
 func (c *Client) Read() *Client {
-	if common.CacheDisabled() {
+	if common.CacheDisabled()  || !common.Config.CacheWindows {
 		return c
 	}
 

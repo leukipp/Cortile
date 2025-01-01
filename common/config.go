@@ -19,6 +19,8 @@ var (
 )
 
 type Configuration struct {
+	CacheWorkspaces   bool              `toml:"cache_workspaces"`    // Cache workspace properties (Tiling enablement, Current layout, proportions)
+	CacheWindows      bool              `toml:"cache_windows"`       // Cache window properties ( Positions, Dimensions)
 	TilingEnabled     bool              `toml:"tiling_enabled"`      // Tile windows on startup
 	TilingLayout      string            `toml:"tiling_layout"`       // Initial tiling layout
 	TilingCycle       []string          `toml:"tiling_cycle"`        // Cycle layout order
@@ -40,6 +42,15 @@ type Configuration struct {
 	Keys              map[string]string `toml:"keys"`                // Event bindings for keyboard shortcuts
 	Corners           map[string]string `toml:"corners"`             // Event bindings for hot-corner actions
 	Systray           map[string]string `toml:"systray"`             // Event bindings for systray icon
+}
+
+/*
+Partially for backward compatibility, partially to stop the config file getting huge,
+for the options which are not commonly needed/wanted, set their default values.
+*/
+func SetConfigDefaults() {
+	Config.CacheWindows = true
+	Config.CacheWorkspaces = true
 }
 
 func InitConfig() {
@@ -84,6 +95,8 @@ func readConfig(configFilePath string, initial bool) {
 		fmt.Printf(": \n  name: %s\n  target: %s\n  version: v%s-%s\n  date: %s\n  flags: %s\n\n", Build.Name, Build.Target, Build.Version, Build.Commit, Build.Date, Build.Flags)
 		fmt.Printf("FILES: \n  log: %s\n  lock: %s\n  cache: %s\n  config: %s\n\n", Args.Log, Args.Lock, Args.Cache, configFilePath)
 	}
+
+	SetConfigDefaults()
 
 	// Decode config file into struct
 	_, err := toml.DecodeFile(configFilePath, &Config)

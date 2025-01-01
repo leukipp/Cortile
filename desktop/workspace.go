@@ -235,7 +235,7 @@ func (ws *Workspace) Restore(flag uint8) {
 }
 
 func (ws *Workspace) Write() {
-	if common.CacheDisabled() {
+	if common.CacheDisabled() || !common.Config.CacheWorkspaces {
 		return
 	}
 
@@ -261,7 +261,7 @@ func (ws *Workspace) Write() {
 }
 
 func (ws *Workspace) Read() *Workspace {
-	if common.CacheDisabled() {
+	if common.CacheDisabled() || !common.Config.CacheWorkspaces {
 		return ws
 	}
 
