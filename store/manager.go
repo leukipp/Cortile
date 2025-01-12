@@ -224,6 +224,56 @@ func (mg *Manager) PreviousClient() *Client {
 	return clients[prev]
 }
 
+func (mg *Manager) DirectionClient(direction common.Direction) *Client {
+	var targetClient *Client
+	var targetDelta int
+	// Update the target client that we will move to
+	updateTarget := func(c *Client, delta int) {
+		newDelta := common.AbsInt(delta)
+		if targetClient == nil {
+			targetClient = c
+			targetDelta = newDelta
+		} else {
+			if newDelta < targetDelta {
+				targetClient = c
+				targetDelta = newDelta
+			}
+		}
+	}
+
+	activeClientX := mg.ActiveClient().Latest.Dimensions.Geometry.X
+	activeClientY := mg.ActiveClient().Latest.Dimensions.Geometry.Y
+	clients := mg.Clients(Stacked)
+	// Find the client in the proper screen segment and closest to the active origin
+	for _, c := range clients {
+		if c.Window.Id != Windows.Active.Id {
+			cX := c.Latest.Dimensions.Geometry.X
+			cY := c.Latest.Dimensions.Geometry.Y
+			switch {
+			case direction == common.Up && cY < activeClientY:
+				updateTarget(c, activeClientX-cX)
+				break
+			case direction == common.Down && cY > activeClientY:
+				updateTarget(c, activeClientX-cX)
+				break
+			case direction == common.Left && cX < activeClientX:
+				updateTarget(c, activeClientY-cY)
+				break
+			case direction == common.Right && cX > activeClientX:
+				updateTarget(c, activeClientY-cY)
+				break
+			}
+		}
+	}
+
+	if targetClient != nil {
+		log.Info("Selected [", targetClient.Latest.Class, "]")
+		return targetClient
+	}
+
+	return nil
+}
+
 func (mg *Manager) IncreaseMaster() {
 
 	// Increase master area

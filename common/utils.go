@@ -142,3 +142,19 @@ func MinInt(a int, b int) int {
 func MaxInt(a int, b int) int {
 	return int(math.Max(float64(a), float64(b)))
 }
+
+type Direction int
+
+const (
+	Up Direction = iota
+	Down
+	Left
+	Right
+)
+
+func AbsInt(n int) int {
+	if n < 0 {
+		return -n
+	}
+	return n
+}
