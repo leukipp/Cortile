@@ -1,6 +1,7 @@
 package desktop
 
 import (
+	"github.com/leukipp/cortile/v2/common"
 	"github.com/leukipp/cortile/v2/store"
 )
 
@@ -14,6 +15,7 @@ type Layout interface {
 	ActiveClient() *store.Client
 	NextClient() *store.Client
 	PreviousClient() *store.Client
+	DirectionClient(d common.Direction) *store.Client
 	IncreaseMaster()
 	DecreaseMaster()
 	IncreaseSlave()

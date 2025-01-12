@@ -81,6 +81,14 @@ func ExecuteAction(action string, tr *desktop.Tracker, ws *desktop.Workspace) bo
 		success = NextWindow(tr, ws)
 	case "window_previous":
 		success = PreviousWindow(tr, ws)
+	case "window_up":
+		success = DirectionWindow(ws, common.Up)
+	case "window_down":
+		success = DirectionWindow(ws, common.Down)
+	case "window_left":
+		success = DirectionWindow(ws, common.Left)
+	case "window_right":
+		success = DirectionWindow(ws, common.Right)
 	case "position_next":
 		success = NextPosition(tr, ws)
 	case "position_previous":
@@ -440,6 +448,21 @@ func NextWindow(tr *desktop.Tracker, ws *desktop.Workspace) bool {
 
 func PreviousWindow(tr *desktop.Tracker, ws *desktop.Workspace) bool {
 	c := ws.ActiveLayout().PreviousClient()
+	if c == nil {
+		return false
+	}
+
+	store.ActiveWindowSet(store.X, c.Window)
+
+	return true
+}
+
+func DirectionWindow(ws *desktop.Workspace, d common.Direction) bool {
+	if ws.TilingDisabled() {
+		return false
+	}
+
+	c := ws.ActiveLayout().DirectionClient(d)
 	if c == nil {
 		return false
 	}
